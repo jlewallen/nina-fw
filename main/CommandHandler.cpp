@@ -321,6 +321,7 @@ int setIPconfig(const uint8_t command[], uint8_t response[])
   response[3] = 1; // parameter 1 length
 
   WiFi.config(ip, gwip, mask);
+  WiFi.softAPConfig(ip, gwip, mask); // jlewallen
 
   return 6;
 }
@@ -388,8 +389,13 @@ int setApNet(const uint8_t command[], uint8_t response[])
   response[2] = 1; // number of parameters
   response[3] = 1; // parameter 1 length
 
-  if (WiFi.AP.create(ssid, /*passphrase*/ NULL, channel)) {
-    response[4] = 1;
+  if (WiFi.AP.begin()) {
+    if (WiFi.AP.create(ssid, /*passphrase*/ NULL, channel)) {
+      response[4] = 1;
+      _setupAfterWifiBegin();
+    } else {
+      response[4] = 0;
+    }
   } else {
     response[4] = 0;
   }
